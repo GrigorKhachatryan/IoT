@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import time
+import requests
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -49,7 +50,9 @@ while True:
     if len(faces) == 0 and status is True:
         status = False
         times = minus_time(start,time.strftime("%H:%M:%S"))
-        print(f'Пользователь {id} покинул территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}, Присутствововал {times}')
+        info = f'Пользователь {id} покинул территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}, Присутствововал {times}'
+        param = {'message': info}
+        a = requests.get('http://biclinic.site/up/iot', params=param )
 
 
     for (x, y, w, h) in faces:
@@ -69,7 +72,9 @@ while True:
 
         if status is False:
             start = time.strftime("%H:%M:%S")
-            print(f'Пользователь {id} зашел на территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}')
+            info = f'Пользователь {id} зашел на территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}'
+            param = {'message': info}
+            a = requests.get('http://biclinic.site/up/iot', params=param)
             status = True
 
     cv2.imshow('camera', img)
