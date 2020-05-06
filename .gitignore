@@ -114,3 +114,6 @@ __pycache__/
 # IntelliJ files
 **/.idea/
 *.iml
+datasaet
+Web_IoT/.venv
+Web_IoT/.idea

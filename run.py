@@ -13,7 +13,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 status = False
 # iniciate id counter
 id = 0
-id_camera = 'Камера №1'
+id_camera = 'Камера №2'
 
 # names related to ids: example ==> Marcelo: id=1,  etc
 names = ['unknown','Grigor']
@@ -31,8 +31,17 @@ def minus_time(start,stop):
     start = start.split(':')
     stop = stop.split(':')
     result = []
-    for i in range(3):
-        result.append(str(int(stop[i])-int(start[i])))
+    H = int(stop[0])-int(start[0])
+    M = int(stop[1])-int(start[1])
+    S = int(stop[2])-int(start[2])
+    if S < 0:
+        M -= 1
+        S += 60
+    if M < 0:
+        H -= 1
+        M += 60
+
+    result.extend([str(H), str(M), str(S)])
     return ':'.join(result)
 
 
@@ -50,9 +59,11 @@ while True:
     if len(faces) == 0 and status is True:
         status = False
         times = minus_time(start,time.strftime("%H:%M:%S"))
-        info = f'Пользователь {id} покинул территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}, Присутствововал {times}'
-        param = {'message': info}
-        a = requests.get('http://biclinic.site/up/iot', params=param )
+        info = f'Пользователь {id} покинул территорию , Присутствововал {times}'
+        param = {'message': info,
+                 'camera': id_camera,
+                 'date': time.strftime("%Y-%m-%d %H:%M:%S")}
+        a = requests.get('http://localhost:5000/up/iot', params=param )
 
 
     for (x, y, w, h) in faces:
@@ -60,7 +71,7 @@ while True:
         id, confidence = recognizer.predict(gray[y:y + h, x:x + w])
 
         # Check if confidence is less them 100 ==> "0" is perfect match
-        if (confidence < 50):
+        if (confidence < 40):
             id = names[id]
             confidence = "  {0}%".format(round(100 - confidence))
         else:
@@ -72,9 +83,11 @@ while True:
 
         if status is False:
             start = time.strftime("%H:%M:%S")
-            info = f'Пользователь {id} зашел на территорию "{id_camera}" в {time.strftime("%Y-%m-%d %H:%M:%S")}'
-            param = {'message': info}
-            a = requests.get('http://biclinic.site/up/iot', params=param)
+            info = f'Пользователь {id} зашел на территорию'
+            param = {'message': info,
+                     'camera': id_camera,
+                     'date': time.strftime("%Y-%m-%d %H:%M:%S")}
+            a = requests.get('http://localhost:5000/up/iot', params=param )
             status = True
 
     cv2.imshow('camera', img)
